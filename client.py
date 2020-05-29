@@ -1,8 +1,14 @@
-import socket, sys
+import socket, sys, pickle
 
-s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 host = '127.0.0.1'
-while True:
-    s.sendto('A'.encode('utf-8'), (host,8888))
-    s.sendto('B'.encode('utf-8'), (host,8888))
-    s.sendto('C'.encode('utf-8'), (host,8888))
+client.connect((host,8889))
+a = [
+    [1,2,3],
+    [3,2,1],
+    [1,2,3],
+]
+client.send(pickle.dumps(a))
+m = client.recv(10000)
+print(pickle.loads(m))
+
