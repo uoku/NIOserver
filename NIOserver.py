@@ -1,45 +1,49 @@
 import select
-import socket
+from socket import socket, AF_INET, SOCK_STREAM, error
 import pickle, time, datetime
 
-with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as ServerSocket:
-    ServerSocket.bind(('127.0.0.1', 8889))
 
-    ServerSocket.setblocking(0)
-
-    reader = [ServerSocket]
+def wait_for_gamer(num_play):
+    reader = []
     writer = []
-    error  = []
-    ServerSocket.listen(5)
+    errors = []
+    with socket(AF_INET, SOCK_STREAM) as serverSocket:  # 創建socket
+        serverSocket.bind(("127.0.0.1", 8888))  # bind to 127.0.0.1:8888
+        serverSocket.setblocking(0)  # NIO
+        reader.append(serverSocket)
+        serverSocket.listen(num_play)  # 監聽 num_play=最大監聽數量
+        count_numofuser = 0
+        while count_numofuser < num_play:
+            readable, writable, exceptions = select.select(reader, writer, errors)
 
-    while True:
-        readable, writable, exception = select.select(reader, writer, error)
+            for s in readable:
+                if s == serverSocket:
+                    client, address = serverSocket.accept()
+                    client.setblocking(0)
+                    reader.append(client)
+                    name, port = client.getpeername()
+                    print(name, "is attend to the game")
+                    count_numofuser += 1
+                else:
+                    try:
+                        message = s.recv(10000)
+                        if len(message) is 0:
+                            raise error
+                        else:
+                            sname, sport = s.getpeername()
+                            print("get message from", sname)
+                            s.send(pickle.dumps("still wait for player"))
+                    except:
+                        reader.remove(s)
+                        sname, sport = s.getpeername()
+                        print("disconnect to ", sname)
+                        s.close()
+                        count_numofuser -= 1
+    print("game start")
+    return serverSocket, reader
 
-        for s in readable:
-            if s == ServerSocket:
-                print('connecting')
-                client, addr = ServerSocket.accept()
-                client.setblocking(0)
-                reader.append(client)
-            else:
-                try:
-                    t1 = datetime.datetime.now().microsecond
-                    t3 = time.mktime(datetime.datetime.now().timetuple())
-                    message = s.recv(10000)
-                    if len(message) is 0:
-                        print('asdf')
-                        raise socket.error
-                    else:
-                        sentence =pickle.loads(message)
-                        print(sentence)
-                        s.send(pickle.dumps(sentence))
-                    t2 = datetime.datetime.now().microsecond
-                    t4 = time.mktime(datetime.datetime.now().timetuple())
-                    strTime = 'funtion time use:%dms' % ((t4 - t3) * 1000 + (t2 - t1) / 1000)
-                    print(strTime)
-                except:
-                    reader.remove(s)
-                    Name, Port = s.getpeername()
-                    print("disconnect to ",Name,"Port",Port)
-                    s.close()
 
+wait_for_gamer(2)
+print("out of function")
+while True:
+    a=input()
