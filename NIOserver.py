@@ -1,6 +1,7 @@
 import select
 from socket import socket, AF_INET, SOCK_STREAM, error
 import pickle, time, datetime
+import pickle
 
 
 def wait_for_gamer(num_play):
@@ -43,7 +44,3 @@ def wait_for_gamer(num_play):
     return serverSocket, reader
 
 
-wait_for_gamer(2)
-print("out of function")
-while True:
-    a=input()
