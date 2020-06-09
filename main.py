@@ -5,7 +5,7 @@ import Map
 
 player_num = 2
 
-socket, reader = server.wait_for_gamer(player_num)
+socket, reader, player_index = server.wait_for_gamer(player_num)
 
 for player in reader:
     if player is not socket:
@@ -16,5 +16,5 @@ reader = reader[1:]
 solidobject = [[1,3],[2,4]]
 map = Map.Map(100, 100, 15, 13, player_num, solidobject)
 
-listen_control.listen_control(socket, reader, map)
+listen_control.listen_control(socket, reader, map, player_index)
 

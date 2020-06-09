@@ -9,6 +9,8 @@ def wait_for_gamer(num_play):
     reader = []
     writer = []
     errors = []
+    player_index = {}
+    i = 0
     with socket(AF_INET, SOCK_STREAM) as serverSocket:  # 創建socket
         serverSocket.bind(("127.0.0.1", 8888))  # bind to 127.0.0.1:8888
         serverSocket.setblocking(0)  # NIO
@@ -22,6 +24,9 @@ def wait_for_gamer(num_play):
                 if s == serverSocket:
                     client, address = serverSocket.accept()
                     client.setblocking(0)
+                    sname, sport = client.getpeername()
+                    player_index[str(sname)]=i
+                    i += 1
                     reader.append(client)
                     name, port = client.getpeername()
                     print(name, "is attend to the game")
@@ -43,6 +48,6 @@ def wait_for_gamer(num_play):
                         s.close()
                         count_numofuser -= 1
     print("game start")
-    return serverSocket, reader
+    return serverSocket, reader, player_index
 
 

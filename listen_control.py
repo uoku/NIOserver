@@ -3,7 +3,7 @@ import select
 from socket import error
 
 
-def listen_control(socket, reader, map):
+def listen_control(socket, reader, map, player_index):
     while True:
         readable, writable, exceptional = select.select(reader, [], [])
 
@@ -12,6 +12,8 @@ def listen_control(socket, reader, map):
                 try:
                     message = s.recv(10000)
                     message = json.loads(message.decode('utf-8'))
+                    name, port  = s.getpeername
+                    playername = player_index[str(name)]
                     if len(message) is 0:
                         raise error
                     else:
@@ -24,18 +26,24 @@ def listen_control(socket, reader, map):
                         if action is 0:
                             # move up
                             move = 0
+                            map.change_player_position(playername, move)
                         elif action is 1:
                             # move right
                             move = 1
+                            map.change_player_position(playername, move)
                         elif action is 2:
                             # move down
                             move = 2
+                            map.change_player_position(playername, move)
                         elif action is 3:
                             # move left
                             move = 3
+                            map.change_player_position(playername, move)
                         elif action is 4:
                             # set waterball
                             move = 4
+                            map.set_waterball(playername)
+                            #設定timer 等待爆炸
                         else:
                             # errors
                             print('something wrong')
